@@ -28,6 +28,14 @@ spec:
   topology:
     dc:
       - name: dc1
-        nodesPerRacks: 4
+        labels:
+          datacenter: "dc1"
+        nodesPerRacks: 2
+        rack:
+          - name: rack1
+      - name: dc2
+        labels:
+          datacenter: "dc2"
+        nodesPerRacks: 2
         rack:
           - name: rack1

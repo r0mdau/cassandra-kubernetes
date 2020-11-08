@@ -21,6 +21,8 @@ You must install laptop-1 first because it contains kubernetes master node.
 
 #### Install laptop-1
 
+Before vagrant uping all, you may need to modify bridge in vm.network property.
+
     cd laptop-1
     vagrant up
     cp kubernetes-setup/kubeconfig ~/.kube/config
@@ -32,7 +34,8 @@ Check everything works fine using kubectl :
     
 #### Install laptop-2
 
-Same commands as laptop-1 without copying the kubeconfig.
+Copy the `laptop-1/kubernetes-setup/join-command` file to the same path in laptop-2.
+Then same commands as laptop-1 without copying the kubeconfig.
 
 #### Install laptop-x
 
@@ -47,6 +50,19 @@ Usefull to dynamically provision local storage.
 
     kubectl apply -f local-path-storage.yaml
 
+#### DC labeling k8s nodes
+
+Because we want to have a multi DC cassandra cluster.
+- 192.168.60.x is dc1
+- 192.168.70.x is dc2
+
+Labeling :
+
+    kubectl label nodes k8s-master datacenter=dc1
+    kubectl label nodes node-61 datacenter=dc1
+    kubectl label nodes node-62 datacenter=dc1
+    kubectl label nodes node-71 datacenter=dc2
+    kubectl label nodes node-72 datacenter=dc2
 
 ### Creating cassandra cluster
 
@@ -74,8 +90,11 @@ Use helm to deploy the cassandra operator :
     kubectl apply -f cassandra/cassandra-configmap-v1.yaml
     kubectl apply -f cassandra/cassandracluster.yaml
         
-In this cluster, we use only 1 rack and want 4 cassandra nodes on it.
-And ask for running only 1 cassandra node per k8s node.
+In this cluster: 
+- 2 datacenters
+- only 1 rack 
+- 2 cassandra nodes on each rack
+- only 1 cassandra node per k8s node.
 
 #### Test cassandra
 
