@@ -1,0 +1,26 @@
+IMAGE_NAME = "debian/buster64"
+N = 2
+
+Vagrant.configure("2") do |config|
+    config.ssh.insert_key = false
+
+    config.vm.provider "virtualbox" do |v|
+        v.memory = 4096
+        v.cpus = 2
+    end
+
+    (1..N).each do |i|
+        config.vm.define "node-7#{i}" do |node|
+            node.vm.box = IMAGE_NAME
+            node.vm.network "public_network", bridge: "wlan0", ip: "192.168.1.#{i + 70}"
+            node.vm.hostname = "node-7#{i}"
+            node.vm.provision "ansible" do |ansible|
+                ansible.playbook = "kubernetes-setup/node-playbook.yml"
+                ansible.extra_vars = {
+                    node_ip: "192.168.1.#{i + 70}",
+                    node_name: "node-7#{i}",
+                }
+            end
+        end
+    end
+end
